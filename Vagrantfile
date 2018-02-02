@@ -12,7 +12,12 @@ Vagrant.configure(2) do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
-  config.vm.box = "boxcutter/centos71"
+  #config.vm.box = "boxcutter/centos71"
+  #config.vm.box = "box-cutter/centos72"
+  #config.vm.box_version = "2.0.20"
+  #config.vm.box = "bertvv/centos71"
+  #config.vm.box_version = "2.0.4"
+  config.vm.box = "russmckendrick/centos71"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs

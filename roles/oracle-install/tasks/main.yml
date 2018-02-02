@@ -13,8 +13,20 @@
 
 # ==> extract files
 - name: Extract installation files
+  ignore_errors: True
+  register: unzipped
   command: 'unzip {{ installation_folder }}/{{ item }} -d {{ installation_folder }}/'
   with_items: '{{ installer_archives }}'
+
+- name: Clean path
+  file:
+    state: absent
+    path: "{{ installation_folder }}/database"
+  when: unzipped | failed
+
+- name: 'unzip failed' 
+  fail: msg="unzip failed"
+  when: unzipped | failed
 
 # ==> generate response file
 - name: Gerenerate the response file for software only installation
@@ -27,12 +39,12 @@
 # ==> execute Inventory command as root
 - name: Execute Inventoty root command
   command: '{{ inventory_location }}/orainstRoot.sh'
-  sudo_user: root
+  become_user: root
 
 # ==> execute DB home command as root
 - name: Execute DB home rfoot command
   command: '{{ oracle_home }}/root.sh'
-  sudo_user: root
+  become_user: root
 
 # ==> TODO: Create a new role for creating the database
 # ==> Create Listener TODO: Parameterize port, name etc
@@ -59,20 +71,20 @@
 
 - name: change oratab
   lineinfile: dest='/etc/oratab' regexp='^{{ oracle_sid }}:{{ oracle_home }}:N' line='{{ oracle_sid }}:{{ oracle_home }}:Y'
-  sudo_user: root
+  become_user: root
 
 - name: copy init.d oracle script to /etc/init.d
   template: src=oradb.j2 dest=/etc/init.d/oradb mode=750
-  sudo_user: root
+  become_user: root
 
 - name: enable oradb script to run at startup
   command: 'chkconfig --add oradb'
-  sudo_user: root
+  become_user: root
 
 # You can remove it for non vagrant server.
 #- name: reboot vagrant virtual machine
 #  local_action: shell vagrant reload
-#  sudo_user: '{{ host_username }}'
+#  become_user: '{{ host_username }}'
 #  ignore_errors: yes
 #  tags:
 #    - reboot-vagrant
